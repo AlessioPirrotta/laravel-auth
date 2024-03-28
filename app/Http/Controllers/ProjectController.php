@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProjectController extends Controller
@@ -26,13 +27,12 @@ class ProjectController extends Controller
         return view('projects.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+public function store(Request $request)
 {
     $request->validate([
-        'title' => 'required|max:255|unique:projects', // Aggiunto 'unique:projects'
+        'title' => 'required|max:255|unique:projects',
+        'img' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
     $formData = $request->all();
@@ -40,18 +40,16 @@ class ProjectController extends Controller
     // Genera lo slug basato sul titolo
     $slug = Str::slug($formData['title']);
 
-    // Aggiungi lo slug ai dati del modulo
+    // Assegna lo slug ai dati del modulo
     $formData['slug'] = $slug;
 
-    // Verifica se esiste già un progetto con lo stesso titolo
-    if (Project::where('title', $formData['title'])->exists()) {
-        // Gestisci il caso in cui esiste già un progetto con lo stesso titolo
-        return redirect()->back()->withErrors(['title' => 'Il titolo del progetto deve essere unico.']);
+    if ($request->hasFile('img')) {
+        // Salva il file e ottieni il percorso
+        $img_path = $request->file('img')->store('project_images', 'public');
+        $formData['img'] = $img_path;
     }
 
-    $newProject = new Project();
-    $newProject->fill($formData);
-    $newProject->save();
+    $newProject = Project::create($formData);
 
     $projects = Project::all();
 
@@ -83,10 +81,28 @@ class ProjectController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $formData = $request->All();
+        $formData = $request->all();
         $project = Project::find($id);
+
+        // Aggiorna il progetto con i dati dal modulo
         $project->update($formData);
-        return redirect()->route('dashboard.projects.index', ['project'=> $project->id]);
+
+        if ($request->hasFile('img')) {
+            // Elimina l'immagine precedente se presente
+            if ($project->img) {
+                Storage::delete($project->img);
+            }
+
+            // Carica la nuova immagine e ottieni il percorso
+            $img_path = $request->file('img')->store('project_images', 'public');
+
+            // Aggiorna il percorso dell'immagine nel modello
+            $project->img = $img_path;
+
+            // Salva il progetto aggiornato
+            $project->save();
+        }
+        return redirect()->route('dashboard.projects.index')->with('success', 'Project updated successfully.');
     }
 
 

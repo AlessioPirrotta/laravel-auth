@@ -7,7 +7,7 @@
 <main>
     <h2 class=" text-red-700 font-bold pb-4 text-2xl">Edita Fumetto</h2>
     <div class="container">
-        <form action="{{ route('dashboard.projects.update', $project->id)}}" method="POST">
+        <form action="{{ route('dashboard.projects.update', $project->id)}}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -18,7 +18,7 @@
 
             <div class="mb-3">
                 <label for="img" class="form-label">Image</label>
-                <input type="text" class="form-control" id="img" name="img" placeholder="Image URL" value="{{old('img', $project->img)}}">
+                <input type="file" class="form-control" id="img" name="img" placeholder="Image URL" value="{{old('img', $project->img)}}">
             </div>
 
             <div class="mb-3 flex items-center">

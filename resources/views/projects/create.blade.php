@@ -6,7 +6,8 @@
 
     <h1>Create new Project</h1>
 
-    <form action="{{ route('dashboard.projects.store')}}" method="POST">
+    <form action="{{ route('dashboard.projects.store')}}" method="POST" enctype="multipart/form-data">
+
         @csrf
 
         <div class="mb-3">
@@ -14,10 +15,12 @@
             <input type="text" class="form-control" id="title" name="title" placeholder="New title: max 4 words">
         </div>
 
-        <div class="mb-3">
-            <label for="img" class="form-label">Example label</label>
-            <input type="text" class="form-control" id="img" name="img" placeholder="Image URL">
+        <div class="form-group">
+          <label for="img"></label>
+          <input type="file" class="form-control" name="img" id="img" aria-describedby="helpId" placeholder="">
+
         </div>
+
 
         <div class="mb-3">
             <label for="description" class="form-label">Example textarea</label>
